@@ -516,6 +516,11 @@ services:
   pgbouncer:
     build: ./pgbouncer
     restart: unless-stopped
+    # PgBouncer writes every level (LOG/WARNING/ERROR) to stderr, so log viewers
+    # flag routine LOG lines as errors. Redirect stderr->stdout; the per-line
+    # "LOG"/"WARNING"/"ERROR" prefix still carries severity. Args mirror the
+    # image's own ENTRYPOINT (/entrypoint.sh) + CMD so config generation is kept.
+    entrypoint: ["/bin/sh", "-c", "exec /entrypoint.sh /usr/bin/pgbouncer /etc/pgbouncer/pgbouncer.ini 2>&1"]
     ports:
       - 6432:${PGBOUNCER_PORT}
     depends_on:
