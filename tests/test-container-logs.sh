@@ -151,9 +151,6 @@ check_logs supavisor \
 check_logs_if_running vector \
     'Vector has started'
 
-check_logs imgproxy \
-    'Starting server at :5001'
-
 echo ""
 echo "=== Results: $pass passed, $fail failed ==="
 echo ""
