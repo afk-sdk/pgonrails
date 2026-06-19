@@ -96,6 +96,13 @@ cd /path/to/repo/site && supabase db push --db-url "$NEW" --yes
 After this the new DB has the **structure** (incl. the new `*_enable_extensions` and `*_live_drift`
 migrations) but only seed data.
 
+> **Memory tuning is automatic on this path.** The image bakes `db/scripts/memory.sql` into
+> `/docker-entrypoint-initdb.d/migrations/99-memory.sql`, so a fresh-volume PG17 boot applies
+> `shared_buffers`/`effective_cache_size`/`work_mem`/`maintenance_work_mem` from the first start
+> (override via `PG_*` vars on the Postgres service). No manual step needed here; an *in-place*
+> `pg_upgrade` would instead need the manual apply documented in that file's header. Run the
+> platform companions (`railway-memory-vars.sh`, `railway-envoy-swap.sh`) in the same window.
+
 ---
 
 ## 4. Restore data into PG17
@@ -141,6 +148,8 @@ psql_new "select count(*) from auth.users;"                    # matches PG15
 psql_new "select count(*) from public.boards;"                 # matches PG15
 psql_new "select extname from pg_extension order by 1;"        # all 23 present
 psql_new "select count(*) from pg_class where relhasindex;"    # indexes rebuilt, no collation warning on connect
+psql_new "select name,setting,pending_restart from pg_settings
+          where name in ('shared_buffers','effective_cache_size','work_mem','maintenance_work_mem');"  # tuned, shared_buffers not pending
 ```
 
 Smoke-test the app against NEW (auth login, a board read/write, a storage upload).
