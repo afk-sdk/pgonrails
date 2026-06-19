@@ -35,6 +35,12 @@ if ! [[ -L "/etc/postgresql-custom" && -d "/var/lib/postgresql/data/custom" ]]; 
   ln -s /var/lib/postgresql/data/custom /etc/postgresql-custom
 fi
 
+# Ensure pgsodium_root.key is readable by the postgres user even on
+# pre-existing Railway volumes created with the wrong ownership.
+if [[ -e /var/lib/postgresql/data/custom ]]; then
+  chown -R postgres:postgres /var/lib/postgresql/data/custom
+fi
+
 # Make "listen_addresses" based on environment
 echo "" >> /etc/postgresql/postgresql.conf
 echo "listen_addresses = '${LISTEN_ADDRESSES}'" >> /etc/postgresql/postgresql.conf
