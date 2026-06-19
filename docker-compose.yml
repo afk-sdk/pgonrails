@@ -276,6 +276,11 @@ services:
 
       DB_USER: supabase_admin
       DB_PASSWORD: ${DB_SUPERUSER_PASSWORD}
+      # Runtime connections (janitor, channels) use the *_REALTIME creds, not DB_USER.
+      # They default to supabase_realtime_admin/postgres, a role this stack never provisions.
+      # Point them at the superuser that migrations already use successfully.
+      DB_USER_REALTIME: supabase_admin
+      DB_PASS_REALTIME: ${DB_SUPERUSER_PASSWORD}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
